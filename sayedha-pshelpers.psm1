@@ -1,4 +1,5 @@
 
+Add-Type -AssemblyName System.Drawing
 
 function New-ImageFromText{
     param(
