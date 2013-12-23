@@ -8,7 +8,7 @@ function New-ImageFromText{
 
         $fontName = "Segoe UI",
         
-        $fontSize = "12.0",
+        $fontSize = "11.0",
 
         $foregroundColor = @(0,0,0),
 
@@ -42,10 +42,14 @@ function New-ImageFromText{
             $img.Save($filePath)
         }
         
-        $brush.Dispose();
-        $drawing.Dispose();
+        $foreColorObj.Dispose()
+        $backColorObj.Dispose()
+        $drawing.Dispose()
+        $font.Dispose()
+        $brush.Dispose()
+        $drawing.Dispose()
 
-        return $img;
+        return $img
     }
 }
 
@@ -65,16 +69,40 @@ function Dispose-Object{
 function Save-Image{
     param(
         [Parameter(
-            Mandatory=$true,
             ValueFromPipeline=$true
             )]
         $image,
 
-        [Parameter(Mandatory=$true)]
+        [switch]
+        $fromclipboard,
+
+        [switch]
+        $toClipboard,
+    
         $filePath
     )
+    begin{
+        Add-Type -AssemblyName System.Drawing
+        Add-Type -AssemblyName System.Windows.Forms
+    }
     process{
-        $image.Save($filePath)
+        if($fromclipboard){
+            $image = ([System.Windows.Forms.Clipboard]::GetImage())
+        }
+
+        if($image -eq $null){
+            '$image parameter must be provided, did you mean to pass -fromClipboard ?' | Write-Error
+            return
+        }
+
+        if($filePath){
+            $image.Save($filePath)
+        }
+
+        if($toClipboard -and $image){
+            [System.Windows.Forms.Clipboard]::SetImage($image)
+        }
+
         return $image
     }    
 }
@@ -88,6 +116,7 @@ function Get-Image {
     )
     begin{
         Add-Type -AssemblyName System.Drawing
+        Add-Type -AssemblyName System.Windows.Forms
     }
     process{
         $image = $null
@@ -107,10 +136,12 @@ function Trim-Image {
     param(
         # this should be image type
         [Parameter(
-            Mandatory=$true,
             ValueFromPipeline=$true)]
         [System.Drawing.Image]
         $image,
+
+        [switch]
+        $fromClipboard,
 
         $trimLeft = 0,
         $trimRight = 0,
@@ -121,6 +152,16 @@ function Trim-Image {
         Add-Type -AssemblyName System.Drawing
     }
     process {
+
+        if($fromClipboard){
+            $image = ([System.Windows.Forms.Clipboard]::GetImage())
+        }
+
+        if($image -eq $null){
+            '$image parameter must be provided, did you mean to pass -fromClipboard ?' | Write-Error
+            return
+        }
+
         # convert the image to a bitmap
         $bitmap = New-Object System.Drawing.Bitmap($image)
 
@@ -136,7 +177,11 @@ function Trim-Image {
 
         $newImage = $bitmap.Clone($cropRect, $bitmap.PixelFormat)
 
-        $newImage.Save('C:\temp\img-fromcloneps.bmp')
+
+        $bitmap.Dispose()
+        $image.Dispose()
+
+        return $newImage
     }
 }
 
@@ -188,12 +233,40 @@ function List-KnownFiles{
         return (Get-ChildItem $global:knownFilesHome -Recurse)
     }
 }
+# $global:knownFilesRoot = $global:knownFiles
+function Configure-KnownFiles{
+    param(
+        $knownFilesRoot = ($global:knownFilesHome)
+    )
+    process{
+        # this will setup IntelliSense and what not for known files
+
+        if($global:knownFilesHome -ne $null){
+            $completion_Process = {
+                param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
+ 
+                "knownFilesRoot: {0}" | Write-Host $knownFilesRoot
+
+                #Get-ChildItem -Path "C:\Data\Dropbox\Personal\PcSettings\CommonFiles\" | ForEach-Object {
+                Get-ChildItem -Path $global:knownFilesHome | ForEach-Object {
+                    # generate a completing results for each
+                    New-Object System.Management.Automation.CompletionResult $_.Name, $_.Name, 'ParameterValue', $_.Name
+                }
+            }
+
+            if (-not $global:options) { $global:options = @{CustomArgumentCompleters = @{};NativeArgumentCompleters = @{}}}
+            $global:options['CustomArgumentCompleters']['Get-KnownFile:relPath'] = $Completion_Process
+            $function:tabexpansion2 = $function:tabexpansion2 -replace 'End\r\n{','End { if ($null -ne $options) { $options += $global:options} else {$options = $global:options}'
+        }
+        else{
+            "You must set global:knownFilesHome to use Configure-KnownFiles" | Write-Error
+        }
+    }
+}
 # New-ImageFromText "this is just a test" | Save-image -filePath 'C:\temp\img-fromps.bmp' | Dispose-Object
+# Get-Image -filePath 'C:\temp\img.bmp' | Trim-Image -trimRight 20 -trimTop 10 -trimBottom 10 -trimLeft 10 | Save-Image -filePath 'c:\temp\img-fromps.bmp'
 
-
-Get-Image -filePath 'C:\temp\img.bmp' | Trim-Image -trimRight 20 -trimTop 10 -trimBottom 10 -trimLeft 10 | Save-Image -filePath 'c:\temp\img-fromps.bmp'
-
-
+Configure-KnownFiles
 Export-ModuleMember -function *
 Export-ModuleMember -Variable *
 Export-ModuleMember -Cmdlet *

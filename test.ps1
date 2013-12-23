@@ -20,3 +20,22 @@ if(Test-Path $modulePath){
 else{
     'Unable to find pshelpers module at [{0}]' -f $modulePath | Write-Error
 }
+
+
+Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Windows.Forms
+
+# put an image on the clipboard
+$imageToPutOnClip = [System.Drawing.Image]::FromFile('C:\temp\img.bmp')
+[System.Windows.Forms.Clipboard]::SetImage($imageToPutOnClip)
+
+#Trim-Image -fromClipboard -trimTop 20 | Save-Image -filePath 'C:\temp\img-fromclip.bmp' | Dispose-Object
+
+Trim-Image -fromClipboard -trimTop 20 | Save-Image -toClipboard | Dispose-Object
+
+#Trim-Image -fromClipboard -trimTop 20 | Save-Image -toClipboard | Dispose-Object
+
+#Save-Image -filePath 'C:\temp\img-fromclip.bmp' -fromClipboard
+
+$imageToPutOnClip.Dispose()
+"all done" | Write-Host
