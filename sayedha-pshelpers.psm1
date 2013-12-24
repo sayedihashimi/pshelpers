@@ -60,7 +60,7 @@ function New-ImageFromTexTAsButton{
 
         $fontName = "Segoe UI",
         
-        $fontSize = "11.0",
+        $fontSize = "9.0",
 
         $bkColor = @(221,221,221),
 
@@ -72,6 +72,25 @@ function New-ImageFromTexTAsButton{
     process{
         # create the image with the correct background color
         $image = New-ImageFromText -text $text -bkColor $bkColor -fontName $fontName -fontSize $fontSize -filePath $filePath
+
+        # We need to expand the image vertically and horizontally to add padding
+        $paddingTop = 2
+        $paddingLeft = 11
+
+        $newImage = New-Object System.Drawing.Bitmap(($image.Width + $paddingLeft*2),($image.Height + $paddingTop*2))
+
+        $backColorObj = [System.Drawing.Color]::FromArgb($bkColor[0], $bkColor[1], $bkColor[2])
+        $drawing = [System.Drawing.Graphics]::FromImage($newImage)
+        $drawing.Clear($backColorObj)
+        $drawing.Dispose()
+
+        $graphics = ([System.Drawing.Graphics]::FromImage($newImage))
+#        $graphics.DrawImage($image, (New-Object System.Drawing.Point($paddingTop,$paddingLeft)))
+        $graphics.DrawImage($image, (New-Object System.Drawing.Point($paddingLeft,$paddingTop)))
+        
+        $image.Dispose()
+        $graphics.Dispose()
+        $image = $newImage
 
         # now we to make the edge a 1 px border colored (112,112,112)
 
