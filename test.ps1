@@ -26,16 +26,17 @@ Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Windows.Forms
 
 # put an image on the clipboard
-$imageToPutOnClip = [System.Drawing.Image]::FromFile('C:\temp\img.bmp')
-[System.Windows.Forms.Clipboard]::SetImage($imageToPutOnClip)
+#$imageToPutOnClip = [System.Drawing.Image]::FromFile('C:\temp\img.bmp')
+#[System.Windows.Forms.Clipboard]::SetImage($imageToPutOnClip)
 
 #Trim-Image -fromClipboard -trimTop 20 | Save-Image -filePath 'C:\temp\img-fromclip.bmp' | Dispose-Object
-
-Trim-Image -fromClipboard -trimTop 20 | Save-Image -toClipboard | Dispose-Object
-
 #Trim-Image -fromClipboard -trimTop 20 | Save-Image -toClipboard | Dispose-Object
-
+#Trim-Image -fromClipboard -trimTop 20 | Save-Image -toClipboard | Dispose-Object
 #Save-Image -filePath 'C:\temp\img-fromclip.bmp' -fromClipboard
 
-$imageToPutOnClip.Dispose()
+#$imageToPutOnClip.Dispose()
+
+New-ImageFromTexTAsButton -text "Manage Profiles..." | Save-Image -toClipboard | Dispose-Object
+"Image is on the clipboard" | Write-Host
+
 "all done" | Write-Host

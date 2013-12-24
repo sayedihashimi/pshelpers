@@ -42,8 +42,6 @@ function New-ImageFromText{
             $img.Save($filePath)
         }
         
-        $foreColorObj.Dispose()
-        $backColorObj.Dispose()
         $drawing.Dispose()
         $font.Dispose()
         $brush.Dispose()
@@ -53,13 +51,53 @@ function New-ImageFromText{
     }
 }
 
+function New-ImageFromTexTAsButton{
+    param(
+        [Parameter(
+            Mandatory=$true,
+            ValueFromPipeline=$true)]
+        $text,
+
+        $fontName = "Segoe UI",
+        
+        $fontSize = "11.0",
+
+        $bkColor = @(221,221,221),
+
+        $filePath
+    )
+    begin{
+        Add-Type -AssemblyName System.Drawing
+    }
+    process{
+        # create the image with the correct background color
+        $image = New-ImageFromText -text $text -bkColor $bkColor -fontName $fontName -fontSize $fontSize -filePath $filePath
+
+        # now we to make the edge a 1 px border colored (112,112,112)
+
+        $borderSize = 1
+        $borderColor = [System.Drawing.Color]::FromArgb(112, 112, 112)
+        $brush = New-Object System.Drawing.SolidBrush($borderColor)
+
+        # http://stackoverflow.com/questions/14593121/how-can-i-create-a-border-frame-around-an-image
+        $graphics = [System.Drawing.Graphics]::FromImage($image)
+        $pen = (New-Object System.Drawing.Pen($brush, [float]$borderSize))
+        $graphics.DrawRectangle( $pen, (New-Object System.Drawing.Rectangle(0,0,([int]$image.Width-$borderSize),([int]$image.Height-$borderSize))))
+        
+        $graphics.Dispose()
+        $brush.Dispose()
+        $pen.Dispose()
+
+        return $image
+    }
+}
+
 function Dispose-Object{
     param(
         [Parameter(ValueFromPipeline=$true)]
         $obj
     )
     process{
-        "in dispose" | Write-Host
         if($obj){
             $obj.Dispose()
         }
