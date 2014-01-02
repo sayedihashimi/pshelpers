@@ -58,13 +58,17 @@ function New-ImageFromTexTAsButton{
             ValueFromPipeline=$true)]
         $text,
 
+        $filePath,
+
         $fontName = "Segoe UI",
         
         $fontSize = "9.0",
-
+        
         $bkColor = @(221,221,221),
 
-        $filePath
+        $paddingTop = 2,
+
+        $paddingLeft = 11
     )
     begin{
         Add-Type -AssemblyName System.Drawing
@@ -74,9 +78,6 @@ function New-ImageFromTexTAsButton{
         $image = New-ImageFromText -text $text -bkColor $bkColor -fontName $fontName -fontSize $fontSize -filePath $filePath
 
         # We need to expand the image vertically and horizontally to add padding
-        $paddingTop = 2
-        $paddingLeft = 11
-
         $newImage = New-Object System.Drawing.Bitmap(($image.Width + $paddingLeft*2),($image.Height + $paddingTop*2))
 
         $backColorObj = [System.Drawing.Color]::FromArgb($bkColor[0], $bkColor[1], $bkColor[2])
@@ -85,14 +86,11 @@ function New-ImageFromTexTAsButton{
         $drawing.Dispose()
 
         $graphics = ([System.Drawing.Graphics]::FromImage($newImage))
-#        $graphics.DrawImage($image, (New-Object System.Drawing.Point($paddingTop,$paddingLeft)))
         $graphics.DrawImage($image, (New-Object System.Drawing.Point($paddingLeft,$paddingTop)))
         
         $image.Dispose()
         $graphics.Dispose()
         $image = $newImage
-
-        # now we to make the edge a 1 px border colored (112,112,112)
 
         $borderSize = 1
         $borderColor = [System.Drawing.Color]::FromArgb(112, 112, 112)
@@ -260,11 +258,16 @@ function Get-KnownFile{
         Copy-Item -Path $fullPath -Destination $destPath
     }
 
+    if($toClipboardAsImage){
+        Get-KnownImageToClipboard -relPath $relPath
+    }
+
     return $fullPath
 }
 
 function Get-KnownImageToClipboard{
     param(
+        [Parameter(Mandatory=$true)]
         $relPath
     )
     begin{
@@ -282,6 +285,10 @@ function Get-KnownImageToClipboard{
         else{
             "Unable to place image [{0}] on the clipboard" -f $relPath | Write-Error
         }
+
+        $image.Dispose()
+
+        return $fullPath
     }
 }
 
