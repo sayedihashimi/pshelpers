@@ -201,7 +201,11 @@ function Trim-Image {
         $trimLeft = 0,
         $trimRight = 0,
         $trimTop = 0,
-        $trimBottom = 0
+        $trimBottom = 0,
+        [switch]
+        $disposeOfImage,
+        [switch]
+        $toClipboard
     )
     begin{
         Add-Type -AssemblyName System.Drawing
@@ -235,6 +239,15 @@ function Trim-Image {
 
         $bitmap.Dispose()
         $image.Dispose()
+
+        if($toClipboard){
+            Save-image -image $newImage -toClipboard
+        }
+
+        if($disposeOfImage){
+            $newImage.Dispose();
+            return $null
+        }
 
         return $newImage
     }
