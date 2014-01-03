@@ -195,20 +195,21 @@ function Trim-Image {
         [System.Drawing.Image]
         $image,
 
-        [switch]
-        $fromClipboard,
-
         $trimLeft = 0,
         $trimRight = 0,
         $trimTop = 0,
         $trimBottom = 0,
+        $trimAll = 0,
         [switch]
         $disposeOfImage,
+        [switch]
+        $fromClipboard,
         [switch]
         $toClipboard
     )
     begin{
         Add-Type -AssemblyName System.Drawing
+        Add-Type -AssemblyName System.Windows.Forms
     }
     process {
 
@@ -219,6 +220,10 @@ function Trim-Image {
         if($image -eq $null){
             '$image parameter must be provided, did you mean to pass -fromClipboard ?' | Write-Error
             return
+        }
+
+        if($trimAll -and $trimAll -ne 0){
+            $trimLeft = $trimRight = $trimTop = $trimBottom = $trimAll
         }
 
         # convert the image to a bitmap
