@@ -345,6 +345,32 @@ function Configure-KnownFiles{
         }
     }
 }
+function Get-FolderSize
+{
+    [cmdletbinding()]
+    param(
+        [Parameter(
+            Mandatory=$true,
+            ValueFromPipeline=$true)]
+        $folder
+    )
+    begin{
+        $fso = New-Object -comobject Scripting.FileSystemObject
+    }
+    process{
+        if($folder){
+            $dirInfo = (Get-Item $folder)
+
+            $path = $dirInfo.fullname
+
+            $folder = $fso.GetFolder($path)
+
+            $size = $folder.size
+
+            return ([PSCustomObject]@{'Name' = $path;'Size' = ($size / 1gb) })
+        }       
+    }
+}
 # New-ImageFromText "this is just a test" | Save-image -filePath 'C:\temp\img-fromps.bmp' | Dispose-Object
 # Get-Image -filePath 'C:\temp\img.bmp' | Trim-Image -trimRight 20 -trimTop 10 -trimBottom 10 -trimLeft 10 | Save-Image -filePath 'c:\temp\img-fromps.bmp'
 
