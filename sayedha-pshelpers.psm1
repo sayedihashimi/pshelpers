@@ -93,7 +93,7 @@ function New-ImageFromTexTAsButton{
         $image = $newImage
 
         $borderSize = 1
-        $borderColor = [System.Drawing.Color]::FromArgb(112, 112, 112)
+        $borderColor = [System.Drawing.Color]::FromArgb(172, 172, 172)
         $brush = New-Object System.Drawing.SolidBrush($borderColor)
 
         # http://stackoverflow.com/questions/14593121/how-can-i-create-a-border-frame-around-an-image
