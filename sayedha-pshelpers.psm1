@@ -310,6 +310,44 @@ function Get-KnownImageToClipboard{
     }
 }
 
+function Set-Owner{
+    [cmdletbinding()]
+    param(
+        [Parameter(
+            Mandatory=$true,
+            ValueFromPipeline=$true)]
+        $item,
+
+        [switch]
+        $recursive
+    )
+    begin{}
+    process{
+        # http://stackoverflow.com/questions/8216510/how-do-i-change-the-owner-of-a-folder-with-powershell-when-get-acl-returns-acce
+        # takeown /F "C:\SomeFolder" /R /D Y
+
+        foreach($itemToSet in $item){
+            $itemObj = Get-Item $itemToSet
+
+            $cmdArgs = @()
+            $cmdArgs += '/F'
+            $cmdArgs += ($itemObj.FullName)
+            if($recursive){
+                $cmdArgs += '/R'
+
+                # these two need to be sequential
+                $cmdArgs += '/D'
+                $cmdArgs += 'Y'
+            }
+
+            'executing command:
+                takeown {0}' -f ($cmdArgs -join ' ') | Write-Host
+
+            & takeown $cmdArgs
+        }
+    }
+}
+
 function List-KnownFiles{
     process{
         return (Get-ChildItem $global:knownFilesHome -Recurse)
