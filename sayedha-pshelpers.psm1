@@ -1,6 +1,8 @@
 
 Add-Type -AssemblyName System.Drawing
-
+# link New-ImageFromText -text Customize -fontStyle ([System.Drawing.FontStyle]::Underline) -bkColor @(255,255,255) -foregroundColor @(0,102,204)
+# New-ImageFromText -text 'No Authentication' -bkColor @(240,240,240) -fontStyle ([System.Drawing.FontStyle]::Bold)
+# text with white bkground New-ImageFromText -text 'Entity Framework' -bkColor @(255,255,255)
 function New-ImageFromText{
     param(
         [Parameter(Mandatory=$true)]
@@ -9,6 +11,8 @@ function New-ImageFromText{
         $fontName = "Segoe UI",
         
         $fontSize = "11.0",
+
+        $fontStyle = [System.Drawing.FontStyle]::Regular,
 
         $foregroundColor = @(0,0,0),
 
@@ -21,8 +25,10 @@ function New-ImageFromText{
     }
     process{
         $img = New-Object System.Drawing.Bitmap 1,1
-        $drawing = [System.Drawing.Graphics]::FromImage($img)
-        $font = New-Object System.Drawing.Font($fontName, $fontSize)
+        $drawing = [System.Drawing.Graphics]::FromImage($img)       
+
+        $font = New-Object System.Drawing.Font($fontName, $fontSize,$fontStyle)
+        
         $textSize = $drawing.MeasureString($text, $font);
 
         $img.Dispose();
@@ -79,12 +85,13 @@ function New-ImageFromTexTAsButton{
 
         # We need to expand the image vertically and horizontally to add padding
         $newImage = New-Object System.Drawing.Bitmap(($image.Width + $paddingLeft*2),($image.Height + $paddingTop*2))
-
+        
         $backColorObj = [System.Drawing.Color]::FromArgb($bkColor[0], $bkColor[1], $bkColor[2])
+        $backColorObj = [System.Drawing.Color]::FromArgb(255,0,0,0)
         $drawing = [System.Drawing.Graphics]::FromImage($newImage)
         $drawing.Clear($backColorObj)
         $drawing.Dispose()
-
+        
         $graphics = ([System.Drawing.Graphics]::FromImage($newImage))
         $graphics.DrawImage($image, (New-Object System.Drawing.Point($paddingLeft,$paddingTop)))
         
