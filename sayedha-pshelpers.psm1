@@ -13,11 +13,9 @@ $global:imghelpersettings = New-Object PSObject -Property @{
 
     ColorLink = @(255,0,102,204)
     ColorGrey = @(255,240,240,240)
+    ColorWhite = @(255,255,255,255)
 }
 
-# link New-ImageFromText -text Customize -fontStyle ([System.Drawing.FontStyle]::Underline) -bkColor @(255,255,255) -foregroundColor @(0,102,204)
-# New-ImageFromText -text 'No Authentication' -bkColor @(240,240,240) -fontStyle ([System.Drawing.FontStyle]::Bold)
-# text with white bkground New-ImageFromText -text 'Entity Framework' -bkColor @(255,255,255)
 function New-TextImageGreyBackground {
     [cmdletbinding()]
     param(
@@ -67,6 +65,34 @@ function New-TextImageAsLink{
         
         $filePath,
         
+        $saveToClipboard = $true
+    )
+    process{
+        New-ImageFromText -text $text -fontName $fontName -fontSize $fontSize -fontStyle $fontStyle -foregroundColor $foregroundColor -bkColor $bkColor -filePath $filePath -saveToClipboard $saveToClipboard
+    }
+}
+
+function New-TextImageWhitebackground{
+    [cmdletbinding()]
+    param(
+        [Parameter(
+            Mandatory=$true,
+            ValueFromPipeline=$true,
+            Position=0)]
+        $text,
+        $fontName = $global:imghelpersettings.DefaultFontName,
+
+        $fontSize = $global:imghelpersettings.DefaultFontSize,        
+
+        [ValidateSet('Regular','Bold','Underline','Italic','Strikeout')]
+        $fontStyle = 'Regular',
+
+        $foregroundColor = $global:imghelpersettings.DefaultForegroundColor,
+
+        $bkColor = @(255,255,255,255),
+
+        $filePath,
+
         $saveToClipboard = $true
     )
     process{
@@ -136,62 +162,6 @@ function New-ImageFromText {
         if($saveToClipboard){
             [System.Windows.Forms.Clipboard]::SetImage($img)
         }
-
-        return $img
-    }
-}
-
-
-
-function New-ImageFromText-Old {
-    param(
-        [Parameter(Mandatory=$true)]
-        $text,
-
-        $fontName = "Segoe UI",
-        
-        $fontSize = "11.0",
-
-        $fontStyle = [System.Drawing.FontStyle]::Regular,
-
-        $foregroundColor = @(0,0,0),
-
-        $bkColor = @(240,240,240),
-
-        $filePath
-    )
-    begin{
-        Add-Type -AssemblyName System.Drawing
-    }
-    process{
-        $img = New-Object System.Drawing.Bitmap 1,1
-        $drawing = [System.Drawing.Graphics]::FromImage($img)       
-
-        $font = New-Object System.Drawing.Font($fontName, $fontSize,$fontStyle)
-        
-        $textSize = $drawing.MeasureString($text, $font);
-
-        $img.Dispose();
-        $drawing.Dispose();
-
-        $foreColorObj = [System.Drawing.Color]::FromArgb($foregroundColor[0], $foregroundColor[1], $foregroundColor[2])
-        $backColorObj = [System.Drawing.Color]::FromArgb($bkColor[0], $bkColor[1], $bkColor[2])
-        $brush = New-Object System.Drawing.SolidBrush($foreColorObj)
-
-        $img = New-Object System.Drawing.Bitmap([int]($textSize.Width), [int]($textSize.Height))
-        $drawing = [System.Drawing.Graphics]::FromImage($img)
-        $drawing.Clear($backColorObj)
-     
-        $drawing.DrawString($text, $font, $brush, 0, 0)
-
-        if($filePath){
-            $img.Save($filePath)
-        }
-        
-        $drawing.Dispose()
-        $font.Dispose()
-        $brush.Dispose()
-        $drawing.Dispose()
 
         return $img
     }
@@ -280,7 +250,7 @@ function Save-Image{
 
         [switch]
         $toClipboard,
-    
+
         $filePath
     )
     begin{
@@ -558,9 +528,8 @@ function Get-FolderSize
 }
 # New-ImageFromText "this is just a test" | Save-image -filePath 'C:\temp\img-fromps.bmp' | Dispose-Object
 # Get-Image -filePath 'C:\temp\img.bmp' | Trim-Image -trimRight 20 -trimTop 10 -trimBottom 10 -trimLeft 10 | Save-Image -filePath 'c:\temp\img-fromps.bmp'
-<#
-Configure-KnownFiles
+
+#Configure-KnownFiles
 Export-ModuleMember -function *
 Export-ModuleMember -Variable *
 Export-ModuleMember -Cmdlet *
-#>

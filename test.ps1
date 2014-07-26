@@ -41,3 +41,6 @@ New-ImageFromTexTAsButton -text "Manage Profiles..." -fontSize 9 | Save-Image -t
 
 "all done" | Write-Host
 #>
+New-TextImageWhitebackground 'text on white bk2'
+New-TextImageAsLink 'link here'
+New-TextImageGreyBackground 'grey bk'
