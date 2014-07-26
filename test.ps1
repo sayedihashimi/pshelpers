@@ -35,8 +35,9 @@ Add-Type -AssemblyName System.Windows.Forms
 #Save-Image -filePath 'C:\temp\img-fromclip.bmp' -fromClipboard
 
 #$imageToPutOnClip.Dispose()
-
+<#
 New-ImageFromTexTAsButton -text "Manage Profiles..." -fontSize 9 | Save-Image -toClipboard | Dispose-Object
 "Image is on the clipboard" | Write-Host
 
 "all done" | Write-Host
+#>
