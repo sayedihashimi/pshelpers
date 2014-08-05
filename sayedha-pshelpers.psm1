@@ -2,11 +2,12 @@
 param()
 
 Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Windows.Forms
 
 $global:imghelpersettings = New-Object PSObject -Property @{
     DefaultFontName = 'Segoe UI'
     DefaultFontStyle = 'Regular'
-    DefaultFontSize = '11.0'
+    DefaultFontSize = '9.0'
 
     DefaultForegroundColor = @(255,0,0,0)
     DefaultBkColor = @(255,240,240,240)
@@ -14,6 +15,21 @@ $global:imghelpersettings = New-Object PSObject -Property @{
     ColorLink = @(255,0,102,204)
     ColorGrey = @(255,240,240,240)
     ColorWhite = @(255,255,255,255)
+}
+
+# http://mnaoumov.wordpress.com/2013/08/21/powershell-resolve-path-safe/
+function Resolve-FullPath{
+    [cmdletbinding()]
+    param
+    (
+        [Parameter(
+            Mandatory=$true,
+            Position=0,
+            ValueFromPipeline=$true)]
+        [string] $path
+    )
+     
+    $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
 }
 
 function New-TextImageGreyBackground {
@@ -39,6 +55,10 @@ function New-TextImageGreyBackground {
         
         $saveToClipboard = $true
     )
+    begin{
+        Add-Type -AssemblyName System.Drawing
+        Add-Type -AssemblyName System.Windows.Forms
+    }
     process{
         New-ImageFromText -text $text -fontName $fontName -fontSize $fontSize -fontStyle $fontStyle -foregroundColor $foregroundColor -bkColor $bkColor -filePath $filePath -saveToClipboard $saveToClipboard
     }
@@ -131,7 +151,9 @@ function New-ImageFromText {
         $fontStyleObj = [Enum]::Parse('System.Drawing.FontStyle',$fontStyle)
 
         $img = New-Object System.Drawing.Bitmap 1,1
+        
         $drawing = [System.Drawing.Graphics]::FromImage($img)       
+        $drawing.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
 
         $font = New-Object System.Drawing.Font($fontName, $fontSize,$fontStyleObj)
         
@@ -146,12 +168,13 @@ function New-ImageFromText {
 
         $img = New-Object System.Drawing.Bitmap([int]($textSize.Width), [int]($textSize.Height))
         $drawing = [System.Drawing.Graphics]::FromImage($img)
+        $drawing.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
         $drawing.Clear($backColorObj)
      
         $drawing.DrawString($text, $font, $brush, 0, 0)
 
         if($filePath){
-            $img.Save($filePath)
+            $img.Save((Resolve-FullPath $filePath))
         }
         
         $drawing.Dispose()
@@ -180,11 +203,12 @@ function New-ImageFromTexTAsButton{
         
         $fontSize = "9.0",
         
-        $bkColor = @(221,221,221),
+        $bkColor = @(255,221,221,221),
 
         $paddingTop = 2,
 
-        $paddingLeft = 11
+        $paddingLeft = 11,
+        $saveToClipboard = $true
     )
     begin{
         Add-Type -AssemblyName System.Drawing
@@ -196,8 +220,7 @@ function New-ImageFromTexTAsButton{
         # We need to expand the image vertically and horizontally to add padding
         $newImage = New-Object System.Drawing.Bitmap(($image.Width + $paddingLeft*2),($image.Height + $paddingTop*2))
         
-        $backColorObj = [System.Drawing.Color]::FromArgb($bkColor[0], $bkColor[1], $bkColor[2])
-        $backColorObj = [System.Drawing.Color]::FromArgb(255,0,0,0)
+        $backColorObj = [System.Drawing.Color]::FromArgb($bkColor[0], $bkColor[1], $bkColor[2],$bkColor[3])
         $drawing = [System.Drawing.Graphics]::FromImage($newImage)
         $drawing.Clear($backColorObj)
         $drawing.Dispose()
@@ -218,6 +241,10 @@ function New-ImageFromTexTAsButton{
         $pen = (New-Object System.Drawing.Pen($brush, [float]$borderSize))
         $graphics.DrawRectangle( $pen, (New-Object System.Drawing.Rectangle(0,0,([int]$image.Width-$borderSize),([int]$image.Height-$borderSize))))
         
+        if($saveToClipboard){
+            [System.Windows.Forms.Clipboard]::SetImage($image)
+        }
+
         $graphics.Dispose()
         $brush.Dispose()
         $pen.Dispose()
@@ -268,7 +295,7 @@ function Save-Image{
         }
 
         if($filePath){
-            $image.Save($filePath)
+            $image.Save((Resolve-FullPath $filePath))
         }
 
         if($toClipboard -and $image){
@@ -294,7 +321,7 @@ function Get-Image {
         $image = $null
         
         if($filePath){
-            $image = ([System.Drawing.Image]::FromFile($filePath))
+            $image = ([System.Drawing.Image]::FromFile((Resolve-FullPath $filePath)))
         }
         elseif($fromClipboard){
             $image = ([System.Windows.Forms.Clipboard]::GetImage())
