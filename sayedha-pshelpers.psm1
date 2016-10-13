@@ -32,6 +32,48 @@ function Resolve-FullPath{
     $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($path)
 }
 
+function Search-DirectoryForString{
+    [cmdletbinding()]
+    param(
+        [Parameter(Mandatory=$true,Position=0)]
+        [string]$text,
+
+        [Parameter(Position=1)]
+        [System.IO.DirectoryInfo[]]$path = '.\',
+
+        [Parameter(Position=2)]
+        [string]$filter,
+
+        [Parameter(Position=3)]
+        [string[]]$exclude,
+
+        [Parameter(Position=4)]
+        [bool]$simpleMatch = $true,
+
+        [Parameter(Position=5)]
+        [bool]$recurse = $true
+    )
+    process{
+        $getitemparams = @{
+            Path = $path
+            Filter = $filter
+            Exclude = [string[]]$exclude
+        }
+        if($recurse){
+            $getitemparams.Add('Recurse',$true)
+        }
+
+        $selectstrparams = @{
+            Pattern = $text
+        }
+        if($simpleMatch){
+            $selectstrparams.Add('SimpleMatch',$true)
+        }
+
+        Get-ChildItem @getitemparams | Select-String @selectstrparams
+    }
+}
+
 function New-TextImageGreyBackground {
     [cmdletbinding()]
     param(
