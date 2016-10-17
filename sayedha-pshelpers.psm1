@@ -17,6 +17,15 @@ $global:imghelpersettings = New-Object PSObject -Property @{
     ColorWhite = @(255,255,255,255)
 }
 
+$global:vscolors = @{
+    "White" = @(255,255,255,255)
+    "Black" = @(255,0,0,0)
+    "GreyBkgrnd" = @(255,240,240,240)
+    "Link" = @(255,0,102,204)
+    "ActiveTab" = @(255,255,242,157)
+}
+
+
 # http://mnaoumov.wordpress.com/2013/08/21/powershell-resolve-path-safe/
 function Resolve-FullPath{
     [cmdletbinding()]
