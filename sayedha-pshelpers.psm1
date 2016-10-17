@@ -493,7 +493,7 @@ function Get-KnownImageToClipboard{
         $image = ([System.Drawing.Image]::FromFile($fullPath))        
         [System.Windows.Forms.Clipboard]::SetImage($image) | Out-Null
         if($?){
-            "Placed [{0}] on the clipboard" -f $relPath | Write-Host
+            "Placed [{0}] on the clipboard" -f $relPath | Write-Output
         }
         else{
             "Unable to place image [{0}] on the clipboard" -f $relPath | Write-Error
@@ -536,7 +536,7 @@ function Set-Owner{
             }
 
             'executing command:
-                takeown {0}' -f ($cmdArgs -join ' ') | Write-Host
+                takeown {0}' -f ($cmdArgs -join ' ') | Write-Output
 
             & takeown $cmdArgs
         }
@@ -560,7 +560,7 @@ function Configure-KnownFiles{
             $completion_Process = {
                 param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
  
-                "knownFilesRoot: {0}" | Write-Host $knownFilesRoot
+                "knownFilesRoot: {0}" | Write-Output $knownFilesRoot
 
                 #Get-ChildItem -Path "C:\Data\Dropbox\Personal\PcSettings\CommonFiles\" | ForEach-Object {
                 Get-ChildItem -Path $global:knownFilesHome | ForEach-Object {
