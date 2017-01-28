@@ -242,7 +242,7 @@ function New-ImageFromText {
     }
 }
 
-function New-ImageFromTexTAsButton{
+function New-ImageFromTextAsButton{
     param(
         [Parameter(
             Mandatory=$true,
