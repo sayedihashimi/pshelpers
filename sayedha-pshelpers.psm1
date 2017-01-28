@@ -82,8 +82,8 @@ function Search-DirectoryForString{
         Get-ChildItem @getitemparams | Select-String @selectstrparams
     }
 }
-
-function New-TextImageGreyBackground {
+<#
+function New-ImageFromGreyBackground {
     [cmdletbinding()]
     param(
         [Parameter(
@@ -114,8 +114,8 @@ function New-TextImageGreyBackground {
         New-ImageFromText -text $text -fontName $fontName -fontSize $fontSize -fontStyle $fontStyle -foregroundColor $foregroundColor -bkColor $bkColor -filePath $filePath -saveToClipboard $saveToClipboard
     }
 }
-
-function New-TextImageAsLink{
+#>
+function New-ImageFromTextAsLink{
     [cmdletbinding()]
     param(
         [Parameter(
@@ -143,7 +143,8 @@ function New-TextImageAsLink{
     }
 }
 
-function New-TextImageWhitebackground{
+<#
+function New-ImageFromWhiteBackground{
     [cmdletbinding()]
     param(
         [Parameter(
@@ -170,7 +171,7 @@ function New-TextImageWhitebackground{
         New-ImageFromText -text $text -fontName $fontName -fontSize $fontSize -fontStyle $fontStyle -foregroundColor $foregroundColor -bkColor $bkColor -filePath $filePath -saveToClipboard $saveToClipboard
     }
 }
-
+#>
 function New-ImageFromText {
     [cmdletbinding()]
     param(
