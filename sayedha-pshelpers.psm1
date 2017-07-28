@@ -82,39 +82,7 @@ function Search-DirectoryForString{
         Get-ChildItem @getitemparams | Select-String @selectstrparams
     }
 }
-<#
-function New-ImageFromGreyBackground {
-    [cmdletbinding()]
-    param(
-        [Parameter(
-            Mandatory=$true,
-            ValueFromPipeline=$true,
-            Position=0)]
-        $text,
-        $fontName = $global:imghelpersettings.DefaultFontName,
-        
-        $fontSize = $global:imghelpersettings.DefaultFontSize,        
-        
-        [ValidateSet('Regular','Bold','Underline','Italic','Strikeout')]
-        $fontStyle = 'Regular',
-        
-        $foregroundColor = $global:imghelpersettings.DefaultForegroundColor,
-        
-        $bkColor = $global:imghelpersettings.ColorGrey,
-        
-        $filePath,
-        
-        $saveToClipboard = $true
-    )
-    begin{
-        Add-Type -AssemblyName System.Drawing
-        Add-Type -AssemblyName System.Windows.Forms
-    }
-    process{
-        New-ImageFromText -text $text -fontName $fontName -fontSize $fontSize -fontStyle $fontStyle -foregroundColor $foregroundColor -bkColor $bkColor -filePath $filePath -saveToClipboard $saveToClipboard
-    }
-}
-#>
+
 function New-ImageFromTextAsLink{
     [cmdletbinding()]
     param(
@@ -143,35 +111,6 @@ function New-ImageFromTextAsLink{
     }
 }
 
-<#
-function New-ImageFromWhiteBackground{
-    [cmdletbinding()]
-    param(
-        [Parameter(
-            Mandatory=$true,
-            ValueFromPipeline=$true,
-            Position=0)]
-        $text,
-        $fontName = $global:imghelpersettings.DefaultFontName,
-
-        $fontSize = $global:imghelpersettings.DefaultFontSize,        
-
-        [ValidateSet('Regular','Bold','Underline','Italic','Strikeout')]
-        $fontStyle = 'Regular',
-
-        $foregroundColor = $global:imghelpersettings.DefaultForegroundColor,
-
-        $bkColor = @(255,255,255,255),
-
-        $filePath,
-
-        $saveToClipboard = $true
-    )
-    process{
-        New-ImageFromText -text $text -fontName $fontName -fontSize $fontSize -fontStyle $fontStyle -foregroundColor $foregroundColor -bkColor $bkColor -filePath $filePath -saveToClipboard $saveToClipboard
-    }
-}
-#>
 function New-ImageFromText {
     [cmdletbinding()]
     param(
@@ -454,58 +393,6 @@ function Trim-Image {
     }
 }
 
-function Get-KnownFile{
-    param(
-        $relPath,
-
-        $destPath,
-
-        [switch]
-        $toClipboardAsImage,
-
-        $knownFilesRoot = ($global:knownFilesHome)
-    )
-
-    $fullPath = (Join-Path -Path $knownFilesRoot -ChildPath $relPath)
-
-    if($destPath){
-        Copy-Item -Path $fullPath -Destination $destPath
-    }
-
-    if($toClipboardAsImage){
-        Get-KnownImageToClipboard -relPath $relPath
-    }
-
-    return $fullPath
-}
-
-function Get-KnownImageToClipboard{
-    param(
-        [Parameter(Mandatory=$true)]
-        $relPath
-    )
-    begin{
-        Add-Type -AssemblyName System.Drawing
-        Add-Type -AssemblyName System.Windows.Forms
-    }
-    process{
-        $fullPath = (Get-KnownFile -relPath $relPath)
-
-        $image = ([System.Drawing.Image]::FromFile($fullPath))        
-        [System.Windows.Forms.Clipboard]::SetImage($image) | Out-Null
-        if($?){
-            "Placed [{0}] on the clipboard" -f $relPath | Write-Output
-        }
-        else{
-            "Unable to place image [{0}] on the clipboard" -f $relPath | Write-Error
-        }
-
-        $image.Dispose()
-
-        return $fullPath
-    }
-}
-
 function Set-Owner{
     [cmdletbinding()]
     param(
@@ -544,41 +431,6 @@ function Set-Owner{
     }
 }
 
-function List-KnownFiles{
-    process{
-        return (Get-ChildItem $global:knownFilesHome -Recurse)
-    }
-}
-# $global:knownFilesRoot = $global:knownFiles
-function Configure-KnownFiles{
-    param(
-        $knownFilesRoot = ($global:knownFilesHome)
-    )
-    process{
-        # this will setup IntelliSense and what not for known files
-
-        if($global:knownFilesHome -ne $null){
-            $completion_Process = {
-                param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameter)
- 
-                "knownFilesRoot: {0}" | Write-Output $knownFilesRoot
-
-                #Get-ChildItem -Path "C:\Data\Dropbox\Personal\PcSettings\CommonFiles\" | ForEach-Object {
-                Get-ChildItem -Path $global:knownFilesHome | ForEach-Object {
-                    # generate a completing results for each
-                    New-Object System.Management.Automation.CompletionResult $_.Name, $_.Name, 'ParameterValue', $_.Name
-                }
-            }
-
-            if (-not $global:options) { $global:options = @{CustomArgumentCompleters = @{};NativeArgumentCompleters = @{}}}
-            $global:options['CustomArgumentCompleters']['Get-KnownFile:relPath'] = $Completion_Process
-            $function:tabexpansion2 = $function:tabexpansion2 -replace 'End\r\n{','End { if ($null -ne $options) { $options += $global:options} else {$options = $global:options}'
-        }
-        else{
-            "You must set global:knownFilesHome to use Configure-KnownFiles" | Write-Error
-        }
-    }
-}
 function Get-FolderSize
 {
     [cmdletbinding()]
@@ -605,10 +457,7 @@ function Get-FolderSize
         }       
     }
 }
-# New-ImageFromText "this is just a test" | Save-image -filePath 'C:\temp\img-fromps.bmp' | Dispose-Object
-# Get-Image -filePath 'C:\temp\img.bmp' | Trim-Image -trimRight 20 -trimTop 10 -trimBottom 10 -trimLeft 10 | Save-Image -filePath 'c:\temp\img-fromps.bmp'
 
-#Configure-KnownFiles
 Export-ModuleMember -function *
 Export-ModuleMember -Variable *
 Export-ModuleMember -Cmdlet *
